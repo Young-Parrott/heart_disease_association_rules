@@ -1,1 +1,1316 @@
-{"metadata":{"kernelspec":{"language":"python","display_name":"Python 3","name":"python3"},"language_info":{"name":"python","version":"3.10.13","mimetype":"text/x-python","codemirror_mode":{"name":"ipython","version":3},"pygments_lexer":"ipython3","nbconvert_exporter":"python","file_extension":".py"},"kaggle":{"accelerator":"none","dataSources":[{"sourceId":8062170,"sourceType":"datasetVersion","datasetId":4755824}],"dockerImageVersionId":30732,"isInternetEnabled":true,"language":"python","sourceType":"notebook","isGpuEnabled":false}},"nbformat_minor":4,"nbformat":4,"cells":[{"cell_type":"code","source":"# This Python 3 environment comes with many helpful analytics libraries installed\n# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n# For example, here's several helpful packages to load\n\nimport numpy as np # linear algebra\nimport pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\n\n# Input data files are available in the read-only \"../input/\" directory\n# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n\nimport os\nfor dirname, _, filenames in os.walk('/kaggle/input'):\n    for filename in filenames:\n        print(os.path.join(dirname, filename))\n\n# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session","metadata":{"_uuid":"8f2839f25d086af736a60e9eeb907d3b93b6e0e5","_cell_guid":"b1076dfc-b9ad-4769-8c92-a6c4dae69d19","execution":{"iopub.status.busy":"2024-06-26T16:42:37.599454Z","iopub.execute_input":"2024-06-26T16:42:37.599917Z","iopub.status.idle":"2024-06-26T16:42:38.166742Z","shell.execute_reply.started":"2024-06-26T16:42:37.599882Z","shell.execute_reply":"2024-06-26T16:42:38.165201Z"},"trusted":true},"execution_count":2,"outputs":[{"name":"stdout","text":"/kaggle/input/heart-disease-dataset/documentation.pdf\n/kaggle/input/heart-disease-dataset/heart_statlog_cleveland_hungary_final.csv\n","output_type":"stream"}]},{"cell_type":"code","source":"# Load the dataset into data frame\nraw_data_df = pd.read_csv('/kaggle/input/heart-disease-dataset/heart_statlog_cleveland_hungary_final.csv')\n\n# Generate sample of the dataset\nprint(raw_data_df.head())","metadata":{"execution":{"iopub.status.busy":"2024-06-26T16:42:38.169122Z","iopub.execute_input":"2024-06-26T16:42:38.169701Z","iopub.status.idle":"2024-06-26T16:42:38.215794Z","shell.execute_reply.started":"2024-06-26T16:42:38.169665Z","shell.execute_reply":"2024-06-26T16:42:38.214619Z"},"trusted":true},"execution_count":3,"outputs":[{"name":"stdout","text":"   age  sex  chest pain type  resting bp s  cholesterol  fasting blood sugar  \\\n0   40    1                2           140          289                    0   \n1   49    0                3           160          180                    0   \n2   37    1                2           130          283                    0   \n3   48    0                4           138          214                    0   \n4   54    1                3           150          195                    0   \n\n   resting ecg  max heart rate  exercise angina  oldpeak  ST slope  target  \n0            0             172                0      0.0         1       0  \n1            0             156                0      1.0         2       1  \n2            1              98                0      0.0         1       0  \n3            0             108                1      1.5         2       1  \n4            0             122                0      0.0         1       0  \n","output_type":"stream"}]},{"cell_type":"code","source":"# Generate descriptive Statistics about the dataset\nprint(raw_data_df.describe())","metadata":{"execution":{"iopub.status.busy":"2024-06-26T16:42:38.217090Z","iopub.execute_input":"2024-06-26T16:42:38.217444Z","iopub.status.idle":"2024-06-26T16:42:38.263704Z","shell.execute_reply.started":"2024-06-26T16:42:38.217414Z","shell.execute_reply":"2024-06-26T16:42:38.262355Z"},"trusted":true},"execution_count":4,"outputs":[{"name":"stdout","text":"               age          sex  chest pain type  resting bp s  cholesterol  \\\ncount  1190.000000  1190.000000      1190.000000   1190.000000  1190.000000   \nmean     53.720168     0.763866         3.232773    132.153782   210.363866   \nstd       9.358203     0.424884         0.935480     18.368823   101.420489   \nmin      28.000000     0.000000         1.000000      0.000000     0.000000   \n25%      47.000000     1.000000         3.000000    120.000000   188.000000   \n50%      54.000000     1.000000         4.000000    130.000000   229.000000   \n75%      60.000000     1.000000         4.000000    140.000000   269.750000   \nmax      77.000000     1.000000         4.000000    200.000000   603.000000   \n\n       fasting blood sugar  resting ecg  max heart rate  exercise angina  \\\ncount          1190.000000  1190.000000     1190.000000      1190.000000   \nmean              0.213445     0.698319      139.732773         0.387395   \nstd               0.409912     0.870359       25.517636         0.487360   \nmin               0.000000     0.000000       60.000000         0.000000   \n25%               0.000000     0.000000      121.000000         0.000000   \n50%               0.000000     0.000000      140.500000         0.000000   \n75%               0.000000     2.000000      160.000000         1.000000   \nmax               1.000000     2.000000      202.000000         1.000000   \n\n           oldpeak     ST slope       target  \ncount  1190.000000  1190.000000  1190.000000  \nmean      0.922773     1.624370     0.528571  \nstd       1.086337     0.610459     0.499393  \nmin      -2.600000     0.000000     0.000000  \n25%       0.000000     1.000000     0.000000  \n50%       0.600000     2.000000     1.000000  \n75%       1.600000     2.000000     1.000000  \nmax       6.200000     3.000000     1.000000  \n","output_type":"stream"}]},{"cell_type":"code","source":"# Check for missing values\nprint(raw_data_df.isna().sum())","metadata":{"execution":{"iopub.status.busy":"2024-06-26T16:42:38.265090Z","iopub.execute_input":"2024-06-26T16:42:38.265482Z","iopub.status.idle":"2024-06-26T16:42:38.275909Z","shell.execute_reply.started":"2024-06-26T16:42:38.265445Z","shell.execute_reply":"2024-06-26T16:42:38.273808Z"},"trusted":true},"execution_count":5,"outputs":[{"name":"stdout","text":"age                    0\nsex                    0\nchest pain type        0\nresting bp s           0\ncholesterol            0\nfasting blood sugar    0\nresting ecg            0\nmax heart rate         0\nexercise angina        0\noldpeak                0\nST slope               0\ntarget                 0\ndtype: int64\n","output_type":"stream"}]},{"cell_type":"code","source":"# Check feature types of dataset\nprint(raw_data_df.dtypes)\n\n# Check number of rows in dataset\nprint('\\nNumber of Rows in the dataset: ')\nprint(len(raw_data_df))\n\n# Check number of columns in dataset\nprint('\\nNumer of Columns in the dataset: ')\nprint(len(raw_data_df.columns))","metadata":{"execution":{"iopub.status.busy":"2024-06-26T16:42:38.279812Z","iopub.execute_input":"2024-06-26T16:42:38.280411Z","iopub.status.idle":"2024-06-26T16:42:38.291866Z","shell.execute_reply.started":"2024-06-26T16:42:38.280357Z","shell.execute_reply":"2024-06-26T16:42:38.290020Z"},"trusted":true},"execution_count":6,"outputs":[{"name":"stdout","text":"age                      int64\nsex                      int64\nchest pain type          int64\nresting bp s             int64\ncholesterol              int64\nfasting blood sugar      int64\nresting ecg              int64\nmax heart rate           int64\nexercise angina          int64\noldpeak                float64\nST slope                 int64\ntarget                   int64\ndtype: object\n\nNumber of Rows in the dataset: \n1190\n\nNumer of Columns in the dataset: \n12\n","output_type":"stream"}]},{"cell_type":"markdown","source":"**From the documentation description of the data:**\n\n1. age: Given in years; Numeric\n2. sex: 1,0; Binary\n    - 1 = male\n    - 0 = female\n3. chest pain type:  1,2,3,4; Nominal\n    - 1 = typical angina\n    - 2 = atyical angina\n    - 3 = non-anginal pain\n    - 4 = asymptomatic\n4. resting blood pressure: in mm Hg, Numeric\n5. serum cholesterol: in mg/dl, Numeric\n6. fasting blood sugar: 1,0 > 120mg/dl, Binary\n    - 1 = true\n    - 0 = false\n7. resting electrocardiogram results: 0,1,2; Nomial\n    - 0 = normal\n    - 1 = having ST-T wave abnormality\n    - 2 = showing probable or definite left ventrivular hypertrophy by Estes' criteria\n8. maximum heart rate achieved: 71-202 Numeric\n9. exercise induced angina: 0,1; Binary\n    - 1 = yes\n    - 0 = no\n10. oldpeat =ST: depression; numeric\n11. the slope of peak exercise ST segment: 0,1,2 Nominal\n    - 1 = upsloping\n    - 2 = flat\n    - 3 = downsloping\n12. class: 0,1 Binary\n    - 1 = heart disease\n    - 2 = Normal","metadata":{}},{"cell_type":"code","source":"# Define Numeric, Categorical, features\nnumeric_feats = ['age', 'resting bp s', 'cholesterol', 'max heart rate', 'oldpeak']\nnominal_feats = ['ST slope', 'resting ecg', 'chest pain type']\nbinary_feats = ['sex', 'fasting blood sugar', 'exercise angina', 'target']","metadata":{"execution":{"iopub.status.busy":"2024-06-26T16:42:38.293285Z","iopub.execute_input":"2024-06-26T16:42:38.293950Z","iopub.status.idle":"2024-06-26T16:42:38.310050Z","shell.execute_reply.started":"2024-06-26T16:42:38.293909Z","shell.execute_reply":"2024-06-26T16:42:38.308597Z"},"trusted":true},"execution_count":7,"outputs":[]},{"cell_type":"code","source":"# Convert nominal_feats into categories then binarize them\nchest_pain_type_var = {'chest pain type':{0:'typical angina', 1:'atypical angina', 2:'non-anginal pain', 3:'asymptomatic'}}\nresting_ecg_var = {'resting ecg': {0:'normal', 1:'having ST-T wave abnormality', 2:'probable or definite left ventricular hypertrophy'}}\nST_slope_var = {'ST slope':{0:'upsloping', 1:'flat', 2:'downsloping'}}\n\n# Change the values back to string equivalent and convert to object\nraw_data_df = raw_data_df.replace(chest_pain_type_var)\nraw_data_df = raw_data_df.replace(resting_ecg_var)\nraw_data_df = raw_data_df.replace(ST_slope_var)\n\n# Binarize with pd dummies\n#raw_data_df = pd.get_dummies(raw_data_df, columns=nominal_feats)","metadata":{"execution":{"iopub.status.busy":"2024-06-26T16:42:38.312339Z","iopub.execute_input":"2024-06-26T16:42:38.313635Z","iopub.status.idle":"2024-06-26T16:42:38.334942Z","shell.execute_reply.started":"2024-06-26T16:42:38.313331Z","shell.execute_reply":"2024-06-26T16:42:38.333563Z"},"trusted":true},"execution_count":8,"outputs":[]},{"cell_type":"code","source":"raw_data_df.dtypes","metadata":{"execution":{"iopub.status.busy":"2024-06-26T16:42:38.337152Z","iopub.execute_input":"2024-06-26T16:42:38.337707Z","iopub.status.idle":"2024-06-26T16:42:38.356060Z","shell.execute_reply.started":"2024-06-26T16:42:38.337659Z","shell.execute_reply":"2024-06-26T16:42:38.354527Z"},"trusted":true},"execution_count":9,"outputs":[{"execution_count":9,"output_type":"execute_result","data":{"text/plain":"age                      int64\nsex                      int64\nchest pain type         object\nresting bp s             int64\ncholesterol              int64\nfasting blood sugar      int64\nresting ecg             object\nmax heart rate           int64\nexercise angina          int64\noldpeak                float64\nST slope                object\ntarget                   int64\ndtype: object"},"metadata":{}}]},{"cell_type":"code","source":"# Uncode the binary features for analysis\nsex_var =  {'sex':{0:'female',1:'male'}}\nfasting_blood_sugar_var = {'fasting blood sugar': {0:'false', 1:'true'}}\nexercise_angina_var = {'exercise angina': {0:'no',1:'yes'}}\nclass_var = {'target': {1:'heart disease', 0:'Normal'}}\n\n# Recode the binary features for use\nraw_data_df = raw_data_df.replace(sex_var)\nraw_data_df = raw_data_df.replace(fasting_blood_sugar_var)\nraw_data_df = raw_data_df.replace(exercise_angina_var)\nraw_data_df = raw_data_df.replace(class_var)\n\n# Binarize with pd.getdummies\n#raw_data_df = pd.get_dummies(raw_data_df, columns=binary_feats)","metadata":{"execution":{"iopub.status.busy":"2024-06-26T16:42:38.357802Z","iopub.execute_input":"2024-06-26T16:42:38.358291Z","iopub.status.idle":"2024-06-26T16:42:38.376188Z","shell.execute_reply.started":"2024-06-26T16:42:38.358248Z","shell.execute_reply":"2024-06-26T16:42:38.374875Z"},"trusted":true},"execution_count":10,"outputs":[]},{"cell_type":"code","source":"raw_data_df.dtypes","metadata":{"execution":{"iopub.status.busy":"2024-06-26T16:42:38.377983Z","iopub.execute_input":"2024-06-26T16:42:38.378683Z","iopub.status.idle":"2024-06-26T16:42:38.388514Z","shell.execute_reply.started":"2024-06-26T16:42:38.378640Z","shell.execute_reply":"2024-06-26T16:42:38.387094Z"},"trusted":true},"execution_count":11,"outputs":[{"execution_count":11,"output_type":"execute_result","data":{"text/plain":"age                      int64\nsex                     object\nchest pain type         object\nresting bp s             int64\ncholesterol              int64\nfasting blood sugar     object\nresting ecg             object\nmax heart rate           int64\nexercise angina         object\noldpeak                float64\nST slope                object\ntarget                  object\ndtype: object"},"metadata":{}}]},{"cell_type":"code","source":"from sklearn.preprocessing import KBinsDiscretizer\n\n# Convert Numeric features to proper Dtype and put into discrete bins then binarize\nraw_data_df['age'] = raw_data_df['age'].astype('int')\nraw_data_df['resting bp s'] = raw_data_df['resting bp s'].astype('int')\nraw_data_df['max heart rate'] = raw_data_df['max heart rate'].astype('int')\nraw_data_df['cholesterol'] = raw_data_df['cholesterol'].astype('int')\nraw_data_df['oldpeak'] = raw_data_df['oldpeak'].astype('float')\n\n\n# Ensure all nominal and binary features are of object type\nraw_data_df[nominal_feats + binary_feats] = raw_data_df[nominal_feats + binary_feats].astype('object')\n\n# Convert Numeric features to proper Dtype and put into discrete bins then binarize\nraw_data_df[numeric_feats] = raw_data_df[numeric_feats].apply(pd.to_numeric)\n\n# Bin the continuous data into intervals\n# Set up discretizer\nest = KBinsDiscretizer(n_bins=2, encode='ordinal', strategy='uniform')\n\n# fit the numeric data into bins\nraw_data_df[numeric_feats] = est.fit_transform(raw_data_df[numeric_feats])\n\n# Convert the binned data to binary using one-hot encoding\ndata_df = pd.get_dummies(raw_data_df, columns=nominal_feats + binary_feats)\n","metadata":{"scrolled":true,"execution":{"iopub.status.busy":"2024-06-26T16:42:38.390077Z","iopub.execute_input":"2024-06-26T16:42:38.390482Z","iopub.status.idle":"2024-06-26T16:42:38.447734Z","shell.execute_reply.started":"2024-06-26T16:42:38.390439Z","shell.execute_reply":"2024-06-26T16:42:38.446484Z"},"trusted":true},"execution_count":12,"outputs":[]},{"cell_type":"code","source":"data_df.dtypes","metadata":{"execution":{"iopub.status.busy":"2024-06-26T16:42:38.449199Z","iopub.execute_input":"2024-06-26T16:42:38.449640Z","iopub.status.idle":"2024-06-26T16:42:38.460117Z","shell.execute_reply.started":"2024-06-26T16:42:38.449605Z","shell.execute_reply":"2024-06-26T16:42:38.458608Z"},"trusted":true},"execution_count":13,"outputs":[{"execution_count":13,"output_type":"execute_result","data":{"text/plain":"age                                                              float64\nresting bp s                                                     float64\ncholesterol                                                      float64\nmax heart rate                                                   float64\noldpeak                                                          float64\nST slope_3                                                          bool\nST slope_downsloping                                                bool\nST slope_flat                                                       bool\nST slope_upsloping                                                  bool\nresting ecg_having ST-T wave abnormality                            bool\nresting ecg_normal                                                  bool\nresting ecg_probable or definite left ventricular hypertrophy       bool\nchest pain type_4                                                   bool\nchest pain type_asymptomatic                                        bool\nchest pain type_atypical angina                                     bool\nchest pain type_non-anginal pain                                    bool\nsex_female                                                          bool\nsex_male                                                            bool\nfasting blood sugar_false                                           bool\nfasting blood sugar_true                                            bool\nexercise angina_no                                                  bool\nexercise angina_yes                                                 bool\ntarget_Normal                                                       bool\ntarget_heart disease                                                bool\ndtype: object"},"metadata":{}}]},{"cell_type":"markdown","source":"Now the data is prepared for use with the apriori algorithm","metadata":{}},{"cell_type":"code","source":"data_df.head()","metadata":{"execution":{"iopub.status.busy":"2024-06-26T16:42:38.461667Z","iopub.execute_input":"2024-06-26T16:42:38.462118Z","iopub.status.idle":"2024-06-26T16:42:38.502739Z","shell.execute_reply.started":"2024-06-26T16:42:38.462084Z","shell.execute_reply":"2024-06-26T16:42:38.501409Z"},"trusted":true},"execution_count":14,"outputs":[{"execution_count":14,"output_type":"execute_result","data":{"text/plain":"   age  resting bp s  cholesterol  max heart rate  oldpeak  ST slope_3  \\\n0  0.0           1.0          0.0             1.0      0.0       False   \n1  0.0           1.0          0.0             1.0      0.0       False   \n2  0.0           1.0          0.0             0.0      0.0       False   \n3  0.0           1.0          0.0             0.0      0.0       False   \n4  1.0           1.0          0.0             0.0      0.0       False   \n\n   ST slope_downsloping  ST slope_flat  ST slope_upsloping  \\\n0                 False           True               False   \n1                  True          False               False   \n2                 False           True               False   \n3                  True          False               False   \n4                 False           True               False   \n\n   resting ecg_having ST-T wave abnormality  ...  \\\n0                                     False  ...   \n1                                     False  ...   \n2                                      True  ...   \n3                                     False  ...   \n4                                     False  ...   \n\n   chest pain type_atypical angina  chest pain type_non-anginal pain  \\\n0                            False                              True   \n1                            False                             False   \n2                            False                              True   \n3                            False                             False   \n4                            False                             False   \n\n   sex_female  sex_male  fasting blood sugar_false  fasting blood sugar_true  \\\n0       False      True                       True                     False   \n1        True     False                       True                     False   \n2       False      True                       True                     False   \n3        True     False                       True                     False   \n4       False      True                       True                     False   \n\n   exercise angina_no  exercise angina_yes  target_Normal  \\\n0                True                False           True   \n1                True                False          False   \n2                True                False           True   \n3               False                 True          False   \n4                True                False           True   \n\n   target_heart disease  \n0                 False  \n1                  True  \n2                 False  \n3                  True  \n4                 False  \n\n[5 rows x 24 columns]","text/html":"<div>\n<style scoped>\n    .dataframe tbody tr th:only-of-type {\n        vertical-align: middle;\n    }\n\n    .dataframe tbody tr th {\n        vertical-align: top;\n    }\n\n    .dataframe thead th {\n        text-align: right;\n    }\n</style>\n<table border=\"1\" class=\"dataframe\">\n  <thead>\n    <tr style=\"text-align: right;\">\n      <th></th>\n      <th>age</th>\n      <th>resting bp s</th>\n      <th>cholesterol</th>\n      <th>max heart rate</th>\n      <th>oldpeak</th>\n      <th>ST slope_3</th>\n      <th>ST slope_downsloping</th>\n      <th>ST slope_flat</th>\n      <th>ST slope_upsloping</th>\n      <th>resting ecg_having ST-T wave abnormality</th>\n      <th>...</th>\n      <th>chest pain type_atypical angina</th>\n      <th>chest pain type_non-anginal pain</th>\n      <th>sex_female</th>\n      <th>sex_male</th>\n      <th>fasting blood sugar_false</th>\n      <th>fasting blood sugar_true</th>\n      <th>exercise angina_no</th>\n      <th>exercise angina_yes</th>\n      <th>target_Normal</th>\n      <th>target_heart disease</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th>0</th>\n      <td>0.0</td>\n      <td>1.0</td>\n      <td>0.0</td>\n      <td>1.0</td>\n      <td>0.0</td>\n      <td>False</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>False</td>\n      <td>...</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>True</td>\n      <td>True</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n    </tr>\n    <tr>\n      <th>1</th>\n      <td>0.0</td>\n      <td>1.0</td>\n      <td>0.0</td>\n      <td>1.0</td>\n      <td>0.0</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>False</td>\n      <td>False</td>\n      <td>...</td>\n      <td>False</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>False</td>\n      <td>True</td>\n    </tr>\n    <tr>\n      <th>2</th>\n      <td>0.0</td>\n      <td>1.0</td>\n      <td>0.0</td>\n      <td>0.0</td>\n      <td>0.0</td>\n      <td>False</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>True</td>\n      <td>...</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>True</td>\n      <td>True</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n    </tr>\n    <tr>\n      <th>3</th>\n      <td>0.0</td>\n      <td>1.0</td>\n      <td>0.0</td>\n      <td>0.0</td>\n      <td>0.0</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>False</td>\n      <td>False</td>\n      <td>...</td>\n      <td>False</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>True</td>\n    </tr>\n    <tr>\n      <th>4</th>\n      <td>1.0</td>\n      <td>1.0</td>\n      <td>0.0</td>\n      <td>0.0</td>\n      <td>0.0</td>\n      <td>False</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>False</td>\n      <td>...</td>\n      <td>False</td>\n      <td>False</td>\n      <td>False</td>\n      <td>True</td>\n      <td>True</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n      <td>True</td>\n      <td>False</td>\n    </tr>\n  </tbody>\n</table>\n<p>5 rows × 24 columns</p>\n</div>"},"metadata":{}}]},{"cell_type":"code","source":"from mlxtend.frequent_patterns import apriori, association_rules\n\n# Use the Apriori algorithm\nfrequent_itemsets = apriori(data_df, min_support=0.3, use_colnames=True)\nrules = association_rules(frequent_itemsets, metric='confidence', min_threshold=0.5)\n\n# Print the association rules\nprint(\"Association Rules:\\n\", rules)","metadata":{"execution":{"iopub.status.busy":"2024-06-26T16:42:38.506493Z","iopub.execute_input":"2024-06-26T16:42:38.506958Z","iopub.status.idle":"2024-06-26T16:42:38.688106Z","shell.execute_reply.started":"2024-06-26T16:42:38.506922Z","shell.execute_reply":"2024-06-26T16:42:38.684471Z"},"trusted":true},"execution_count":15,"outputs":[{"name":"stdout","text":"Association Rules:\n                                          antecedents  \\\n0                                              (age)   \n1                                     (resting bp s)   \n2                                              (age)   \n3                                   (max heart rate)   \n4                                              (age)   \n..                                               ...   \n568                    (target_Normal, resting bp s)   \n569  (fasting blood sugar_false, exercise angina_no)   \n570               (exercise angina_no, resting bp s)   \n571                                  (target_Normal)   \n572                             (exercise angina_no)   \n\n                                           consequents  antecedent support  \\\n0                                       (resting bp s)            0.582353   \n1                                                (age)            0.987395   \n2                                     (max heart rate)            0.582353   \n3                                                (age)            0.619328   \n4                               (ST slope_downsloping)            0.582353   \n..                                                 ...                 ...   \n568    (fasting blood sugar_false, exercise angina_no)            0.466387   \n569                      (target_Normal, resting bp s)            0.492437   \n570         (target_Normal, fasting blood sugar_false)            0.605042   \n571  (fasting blood sugar_false, exercise angina_no...            0.471429   \n572  (target_Normal, fasting blood sugar_false, res...            0.612605   \n\n     consequent support   support  confidence      lift  leverage  conviction  \\\n0              0.987395  0.578151    0.992785  1.005459  0.003139    1.747059   \n1              0.582353  0.578151    0.585532  1.005459  0.003139    1.007670   \n2              0.619328  0.310084    0.532468  0.859751 -0.050583    0.814216   \n3              0.582353  0.310084    0.500678  0.859751 -0.050583    0.836429   \n4              0.489076  0.324370    0.556999  1.138880  0.039555    1.153324   \n..                  ...       ...         ...       ...       ...         ...   \n568            0.492437  0.354622    0.760360  1.544076  0.124956    2.118026   \n569            0.466387  0.354622    0.720137  1.544076  0.124956    1.906692   \n570            0.415126  0.354622    0.586111  1.411887  0.103453    1.413118   \n571            0.489076  0.354622    0.752228  1.538061  0.124058    2.062076   \n572            0.410084  0.354622    0.578875  1.411601  0.103402    1.400810   \n\n     zhangs_metric  \n0         0.013000  \n1         0.430717  \n2        -0.280879  \n3        -0.299977  \n4         0.291980  \n..             ...  \n568       0.660335  \n569       0.694226  \n570       0.738631  \n571       0.661842  \n572       0.752681  \n\n[573 rows x 10 columns]\n","output_type":"stream"},{"name":"stderr","text":"/opt/conda/lib/python3.10/site-packages/mlxtend/frequent_patterns/fpcommon.py:109: DeprecationWarning: DataFrames with non-bool types result in worse computationalperformance and their support might be discontinued in the future.Please use a DataFrame with bool type\n  warnings.warn(\n","output_type":"stream"}]}]}
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "7ff014a9",
+   "metadata": {
+    "_cell_guid": "b1076dfc-b9ad-4769-8c92-a6c4dae69d19",
+    "_uuid": "8f2839f25d086af736a60e9eeb907d3b93b6e0e5",
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:41.118619Z",
+     "iopub.status.busy": "2024-06-26T18:43:41.117696Z",
+     "iopub.status.idle": "2024-06-26T18:43:41.932749Z",
+     "shell.execute_reply": "2024-06-26T18:43:41.931566Z"
+    },
+    "papermill": {
+     "duration": 0.824564,
+     "end_time": "2024-06-26T18:43:41.935143",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:41.110579",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "/kaggle/input/heart-disease-dataset/documentation.pdf\n",
+      "/kaggle/input/heart-disease-dataset/heart_statlog_cleveland_hungary_final.csv\n"
+     ]
+    }
+   ],
+   "source": [
+    "# This Python 3 environment comes with many helpful analytics libraries installed\n",
+    "# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n",
+    "# For example, here's several helpful packages to load\n",
+    "\n",
+    "import numpy as np # linear algebra\n",
+    "import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\n",
+    "\n",
+    "# Input data files are available in the read-only \"../input/\" directory\n",
+    "# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n",
+    "\n",
+    "import os\n",
+    "for dirname, _, filenames in os.walk('/kaggle/input'):\n",
+    "    for filename in filenames:\n",
+    "        print(os.path.join(dirname, filename))\n",
+    "\n",
+    "# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n",
+    "# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "feef6a2d",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:41.950055Z",
+     "iopub.status.busy": "2024-06-26T18:43:41.949587Z",
+     "iopub.status.idle": "2024-06-26T18:43:41.987396Z",
+     "shell.execute_reply": "2024-06-26T18:43:41.986364Z"
+    },
+    "papermill": {
+     "duration": 0.046577,
+     "end_time": "2024-06-26T18:43:41.989717",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:41.943140",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "   age  sex  chest pain type  resting bp s  cholesterol  fasting blood sugar  \\\n",
+      "0   40    1                2           140          289                    0   \n",
+      "1   49    0                3           160          180                    0   \n",
+      "2   37    1                2           130          283                    0   \n",
+      "3   48    0                4           138          214                    0   \n",
+      "4   54    1                3           150          195                    0   \n",
+      "\n",
+      "   resting ecg  max heart rate  exercise angina  oldpeak  ST slope  target  \n",
+      "0            0             172                0      0.0         1       0  \n",
+      "1            0             156                0      1.0         2       1  \n",
+      "2            1              98                0      0.0         1       0  \n",
+      "3            0             108                1      1.5         2       1  \n",
+      "4            0             122                0      0.0         1       0  \n"
+     ]
+    }
+   ],
+   "source": [
+    "# Load the dataset into data frame\n",
+    "raw_data_df = pd.read_csv('/kaggle/input/heart-disease-dataset/heart_statlog_cleveland_hungary_final.csv')\n",
+    "\n",
+    "# Generate sample of the dataset\n",
+    "print(raw_data_df.head())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "35be1f55",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:42.002250Z",
+     "iopub.status.busy": "2024-06-26T18:43:42.001570Z",
+     "iopub.status.idle": "2024-06-26T18:43:42.036605Z",
+     "shell.execute_reply": "2024-06-26T18:43:42.035373Z"
+    },
+    "papermill": {
+     "duration": 0.043972,
+     "end_time": "2024-06-26T18:43:42.039056",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:41.995084",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "               age          sex  chest pain type  resting bp s  cholesterol  \\\n",
+      "count  1190.000000  1190.000000      1190.000000   1190.000000  1190.000000   \n",
+      "mean     53.720168     0.763866         3.232773    132.153782   210.363866   \n",
+      "std       9.358203     0.424884         0.935480     18.368823   101.420489   \n",
+      "min      28.000000     0.000000         1.000000      0.000000     0.000000   \n",
+      "25%      47.000000     1.000000         3.000000    120.000000   188.000000   \n",
+      "50%      54.000000     1.000000         4.000000    130.000000   229.000000   \n",
+      "75%      60.000000     1.000000         4.000000    140.000000   269.750000   \n",
+      "max      77.000000     1.000000         4.000000    200.000000   603.000000   \n",
+      "\n",
+      "       fasting blood sugar  resting ecg  max heart rate  exercise angina  \\\n",
+      "count          1190.000000  1190.000000     1190.000000      1190.000000   \n",
+      "mean              0.213445     0.698319      139.732773         0.387395   \n",
+      "std               0.409912     0.870359       25.517636         0.487360   \n",
+      "min               0.000000     0.000000       60.000000         0.000000   \n",
+      "25%               0.000000     0.000000      121.000000         0.000000   \n",
+      "50%               0.000000     0.000000      140.500000         0.000000   \n",
+      "75%               0.000000     2.000000      160.000000         1.000000   \n",
+      "max               1.000000     2.000000      202.000000         1.000000   \n",
+      "\n",
+      "           oldpeak     ST slope       target  \n",
+      "count  1190.000000  1190.000000  1190.000000  \n",
+      "mean      0.922773     1.624370     0.528571  \n",
+      "std       1.086337     0.610459     0.499393  \n",
+      "min      -2.600000     0.000000     0.000000  \n",
+      "25%       0.000000     1.000000     0.000000  \n",
+      "50%       0.600000     2.000000     1.000000  \n",
+      "75%       1.600000     2.000000     1.000000  \n",
+      "max       6.200000     3.000000     1.000000  \n"
+     ]
+    }
+   ],
+   "source": [
+    "# Generate descriptive Statistics about the dataset\n",
+    "print(raw_data_df.describe())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "383b96af",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:42.051629Z",
+     "iopub.status.busy": "2024-06-26T18:43:42.050862Z",
+     "iopub.status.idle": "2024-06-26T18:43:42.057767Z",
+     "shell.execute_reply": "2024-06-26T18:43:42.056589Z"
+    },
+    "papermill": {
+     "duration": 0.015538,
+     "end_time": "2024-06-26T18:43:42.059980",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:42.044442",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "age                    0\n",
+      "sex                    0\n",
+      "chest pain type        0\n",
+      "resting bp s           0\n",
+      "cholesterol            0\n",
+      "fasting blood sugar    0\n",
+      "resting ecg            0\n",
+      "max heart rate         0\n",
+      "exercise angina        0\n",
+      "oldpeak                0\n",
+      "ST slope               0\n",
+      "target                 0\n",
+      "dtype: int64\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Check for missing values\n",
+    "print(raw_data_df.isna().sum())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "2015d4c3",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:42.072236Z",
+     "iopub.status.busy": "2024-06-26T18:43:42.071866Z",
+     "iopub.status.idle": "2024-06-26T18:43:42.078527Z",
+     "shell.execute_reply": "2024-06-26T18:43:42.077556Z"
+    },
+    "papermill": {
+     "duration": 0.015582,
+     "end_time": "2024-06-26T18:43:42.081004",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:42.065422",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "age                      int64\n",
+      "sex                      int64\n",
+      "chest pain type          int64\n",
+      "resting bp s             int64\n",
+      "cholesterol              int64\n",
+      "fasting blood sugar      int64\n",
+      "resting ecg              int64\n",
+      "max heart rate           int64\n",
+      "exercise angina          int64\n",
+      "oldpeak                float64\n",
+      "ST slope                 int64\n",
+      "target                   int64\n",
+      "dtype: object\n",
+      "\n",
+      "Number of Rows in the dataset: \n",
+      "1190\n",
+      "\n",
+      "Numer of Columns in the dataset: \n",
+      "12\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Check feature types of dataset\n",
+    "print(raw_data_df.dtypes)\n",
+    "\n",
+    "# Check number of rows in dataset\n",
+    "print('\\nNumber of Rows in the dataset: ')\n",
+    "print(len(raw_data_df))\n",
+    "\n",
+    "# Check number of columns in dataset\n",
+    "print('\\nNumer of Columns in the dataset: ')\n",
+    "print(len(raw_data_df.columns))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6a1dae8e",
+   "metadata": {
+    "papermill": {
+     "duration": 0.005226,
+     "end_time": "2024-06-26T18:43:42.091680",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:42.086454",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "**From the documentation description of the data:**\n",
+    "\n",
+    "1. age: Given in years; Numeric\n",
+    "2. sex: 1,0; Binary\n",
+    "    - 1 = male\n",
+    "    - 0 = female\n",
+    "3. chest pain type:  1,2,3,4; Nominal\n",
+    "    - 1 = typical angina\n",
+    "    - 2 = atyical angina\n",
+    "    - 3 = non-anginal pain\n",
+    "    - 4 = asymptomatic\n",
+    "4. resting blood pressure: in mm Hg, Numeric\n",
+    "5. serum cholesterol: in mg/dl, Numeric\n",
+    "6. fasting blood sugar: 1,0 > 120mg/dl, Binary\n",
+    "    - 1 = true\n",
+    "    - 0 = false\n",
+    "7. resting electrocardiogram results: 0,1,2; Nomial\n",
+    "    - 0 = normal\n",
+    "    - 1 = having ST-T wave abnormality\n",
+    "    - 2 = showing probable or definite left ventrivular hypertrophy by Estes' criteria\n",
+    "8. maximum heart rate achieved: 71-202 Numeric\n",
+    "9. exercise induced angina: 0,1; Binary\n",
+    "    - 1 = yes\n",
+    "    - 0 = no\n",
+    "10. oldpeat =ST: depression; numeric\n",
+    "11. the slope of peak exercise ST segment: 0,1,2 Nominal\n",
+    "    - 1 = upsloping\n",
+    "    - 2 = flat\n",
+    "    - 3 = downsloping\n",
+    "12. class: 0,1 Binary\n",
+    "    - 1 = heart disease\n",
+    "    - 2 = Normal"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "c181a181",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:42.103999Z",
+     "iopub.status.busy": "2024-06-26T18:43:42.103651Z",
+     "iopub.status.idle": "2024-06-26T18:43:42.108890Z",
+     "shell.execute_reply": "2024-06-26T18:43:42.107833Z"
+    },
+    "papermill": {
+     "duration": 0.01401,
+     "end_time": "2024-06-26T18:43:42.111103",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:42.097093",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Define Numeric, Categorical, features\n",
+    "numeric_feats = ['age', 'resting bp s', 'cholesterol', 'max heart rate', 'oldpeak']\n",
+    "nominal_feats = ['ST slope', 'resting ecg', 'chest pain type']\n",
+    "binary_feats = ['sex', 'fasting blood sugar', 'exercise angina', 'target']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "69a7238b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:42.124099Z",
+     "iopub.status.busy": "2024-06-26T18:43:42.123476Z",
+     "iopub.status.idle": "2024-06-26T18:43:42.136307Z",
+     "shell.execute_reply": "2024-06-26T18:43:42.135421Z"
+    },
+    "papermill": {
+     "duration": 0.021866,
+     "end_time": "2024-06-26T18:43:42.138477",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:42.116611",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Convert nominal_feats into categories then binarize them\n",
+    "chest_pain_type_var = {'chest pain type':{0:'typical angina', 1:'atypical angina', 2:'non-anginal pain', 3:'asymptomatic'}}\n",
+    "resting_ecg_var = {'resting ecg': {0:'normal', 1:'having ST-T wave abnormality', 2:'probable or definite left ventricular hypertrophy'}}\n",
+    "ST_slope_var = {'ST slope':{0:'upsloping', 1:'flat', 2:'downsloping'}}\n",
+    "\n",
+    "# Change the values back to string equivalent and convert to object\n",
+    "raw_data_df = raw_data_df.replace(chest_pain_type_var)\n",
+    "raw_data_df = raw_data_df.replace(resting_ecg_var)\n",
+    "raw_data_df = raw_data_df.replace(ST_slope_var)\n",
+    "\n",
+    "# Binarize with pd dummies\n",
+    "#raw_data_df = pd.get_dummies(raw_data_df, columns=nominal_feats)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "bd16a5bc",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:42.151652Z",
+     "iopub.status.busy": "2024-06-26T18:43:42.150886Z",
+     "iopub.status.idle": "2024-06-26T18:43:42.159494Z",
+     "shell.execute_reply": "2024-06-26T18:43:42.158536Z"
+    },
+    "papermill": {
+     "duration": 0.017394,
+     "end_time": "2024-06-26T18:43:42.161657",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:42.144263",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "age                      int64\n",
+       "sex                      int64\n",
+       "chest pain type         object\n",
+       "resting bp s             int64\n",
+       "cholesterol              int64\n",
+       "fasting blood sugar      int64\n",
+       "resting ecg             object\n",
+       "max heart rate           int64\n",
+       "exercise angina          int64\n",
+       "oldpeak                float64\n",
+       "ST slope                object\n",
+       "target                   int64\n",
+       "dtype: object"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "raw_data_df.dtypes"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "a2a66998",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:42.174080Z",
+     "iopub.status.busy": "2024-06-26T18:43:42.173727Z",
+     "iopub.status.idle": "2024-06-26T18:43:42.186798Z",
+     "shell.execute_reply": "2024-06-26T18:43:42.185773Z"
+    },
+    "papermill": {
+     "duration": 0.021908,
+     "end_time": "2024-06-26T18:43:42.189027",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:42.167119",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Uncode the binary features for analysis\n",
+    "sex_var =  {'sex':{0:'female',1:'male'}}\n",
+    "fasting_blood_sugar_var = {'fasting blood sugar': {0:'false', 1:'true'}}\n",
+    "exercise_angina_var = {'exercise angina': {0:'no',1:'yes'}}\n",
+    "class_var = {'target': {1:'heart disease', 0:'Normal'}}\n",
+    "\n",
+    "# Recode the binary features for use\n",
+    "raw_data_df = raw_data_df.replace(sex_var)\n",
+    "raw_data_df = raw_data_df.replace(fasting_blood_sugar_var)\n",
+    "raw_data_df = raw_data_df.replace(exercise_angina_var)\n",
+    "raw_data_df = raw_data_df.replace(class_var)\n",
+    "\n",
+    "# Binarize with pd.getdummies\n",
+    "#raw_data_df = pd.get_dummies(raw_data_df, columns=binary_feats)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "814e104c",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:42.201617Z",
+     "iopub.status.busy": "2024-06-26T18:43:42.201253Z",
+     "iopub.status.idle": "2024-06-26T18:43:42.208492Z",
+     "shell.execute_reply": "2024-06-26T18:43:42.207590Z"
+    },
+    "papermill": {
+     "duration": 0.016021,
+     "end_time": "2024-06-26T18:43:42.210700",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:42.194679",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "age                      int64\n",
+       "sex                     object\n",
+       "chest pain type         object\n",
+       "resting bp s             int64\n",
+       "cholesterol              int64\n",
+       "fasting blood sugar     object\n",
+       "resting ecg             object\n",
+       "max heart rate           int64\n",
+       "exercise angina         object\n",
+       "oldpeak                float64\n",
+       "ST slope                object\n",
+       "target                  object\n",
+       "dtype: object"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "raw_data_df.dtypes"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "577fa00d",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:42.223743Z",
+     "iopub.status.busy": "2024-06-26T18:43:42.223405Z",
+     "iopub.status.idle": "2024-06-26T18:43:43.313227Z",
+     "shell.execute_reply": "2024-06-26T18:43:43.312150Z"
+    },
+    "papermill": {
+     "duration": 1.099093,
+     "end_time": "2024-06-26T18:43:43.315803",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:42.216710",
+     "status": "completed"
+    },
+    "scrolled": true,
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "from sklearn.preprocessing import KBinsDiscretizer\n",
+    "\n",
+    "# Convert Numeric features to proper Dtype and put into discrete bins then binarize\n",
+    "raw_data_df['age'] = raw_data_df['age'].astype('int')\n",
+    "raw_data_df['resting bp s'] = raw_data_df['resting bp s'].astype('int')\n",
+    "raw_data_df['max heart rate'] = raw_data_df['max heart rate'].astype('int')\n",
+    "raw_data_df['cholesterol'] = raw_data_df['cholesterol'].astype('int')\n",
+    "raw_data_df['oldpeak'] = raw_data_df['oldpeak'].astype('float')\n",
+    "\n",
+    "\n",
+    "# Ensure all nominal and binary features are of object type\n",
+    "raw_data_df[nominal_feats + binary_feats] = raw_data_df[nominal_feats + binary_feats].astype('object')\n",
+    "\n",
+    "# Convert Numeric features to proper Dtype and put into discrete bins then binarize\n",
+    "raw_data_df[numeric_feats] = raw_data_df[numeric_feats].apply(pd.to_numeric)\n",
+    "\n",
+    "# Bin the continuous data into intervals\n",
+    "# Set up discretizer\n",
+    "est = KBinsDiscretizer(n_bins=2, encode='ordinal', strategy='uniform')\n",
+    "\n",
+    "# fit the numeric data into bins\n",
+    "raw_data_df[numeric_feats] = est.fit_transform(raw_data_df[numeric_feats])\n",
+    "\n",
+    "# Convert bin indices to readable labels\n",
+    "for i, feature in enumerate(numeric_feats):\n",
+    "    bin_edges = est.bin_edges_[i]\n",
+    "    labels = [f\"{feature}_[{bin_edges[j]:.2f}-{bin_edges[j+1]:.2f}]\" for j in range(len(bin_edges)-1)]\n",
+    "    raw_data_df[feature] = pd.cut(raw_data_df[feature], bins=bin_edges, labels=labels, include_lowest=True)\n",
+    "\n",
+    "# Convert the binned data to binary using one-hot encoding\n",
+    "data_df = pd.get_dummies(raw_data_df, columns=nominal_feats + binary_feats + numeric_feats)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "3836d706",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:43.329319Z",
+     "iopub.status.busy": "2024-06-26T18:43:43.328974Z",
+     "iopub.status.idle": "2024-06-26T18:43:43.337010Z",
+     "shell.execute_reply": "2024-06-26T18:43:43.336127Z"
+    },
+    "papermill": {
+     "duration": 0.017072,
+     "end_time": "2024-06-26T18:43:43.339090",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:43.322018",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "ST slope_3                                                       bool\n",
+       "ST slope_downsloping                                             bool\n",
+       "ST slope_flat                                                    bool\n",
+       "ST slope_upsloping                                               bool\n",
+       "resting ecg_having ST-T wave abnormality                         bool\n",
+       "resting ecg_normal                                               bool\n",
+       "resting ecg_probable or definite left ventricular hypertrophy    bool\n",
+       "chest pain type_4                                                bool\n",
+       "chest pain type_asymptomatic                                     bool\n",
+       "chest pain type_atypical angina                                  bool\n",
+       "chest pain type_non-anginal pain                                 bool\n",
+       "sex_female                                                       bool\n",
+       "sex_male                                                         bool\n",
+       "fasting blood sugar_false                                        bool\n",
+       "fasting blood sugar_true                                         bool\n",
+       "exercise angina_no                                               bool\n",
+       "exercise angina_yes                                              bool\n",
+       "target_Normal                                                    bool\n",
+       "target_heart disease                                             bool\n",
+       "age_age_[28.00-52.50]                                            bool\n",
+       "age_age_[52.50-77.00]                                            bool\n",
+       "resting bp s_resting bp s_[0.00-100.00]                          bool\n",
+       "resting bp s_resting bp s_[100.00-200.00]                        bool\n",
+       "cholesterol_cholesterol_[0.00-301.50]                            bool\n",
+       "cholesterol_cholesterol_[301.50-603.00]                          bool\n",
+       "max heart rate_max heart rate_[60.00-131.00]                     bool\n",
+       "max heart rate_max heart rate_[131.00-202.00]                    bool\n",
+       "oldpeak_oldpeak_[-2.60-1.80]                                     bool\n",
+       "oldpeak_oldpeak_[1.80-6.20]                                      bool\n",
+       "dtype: object"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "data_df.dtypes"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "18df91f2",
+   "metadata": {
+    "papermill": {
+     "duration": 0.005595,
+     "end_time": "2024-06-26T18:43:43.350589",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:43.344994",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "Now the data is prepared for use with the apriori algorithm"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "5df68f9b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:43.364184Z",
+     "iopub.status.busy": "2024-06-26T18:43:43.363326Z",
+     "iopub.status.idle": "2024-06-26T18:43:43.388446Z",
+     "shell.execute_reply": "2024-06-26T18:43:43.387389Z"
+    },
+    "papermill": {
+     "duration": 0.034314,
+     "end_time": "2024-06-26T18:43:43.390814",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:43.356500",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>ST slope_3</th>\n",
+       "      <th>ST slope_downsloping</th>\n",
+       "      <th>ST slope_flat</th>\n",
+       "      <th>ST slope_upsloping</th>\n",
+       "      <th>resting ecg_having ST-T wave abnormality</th>\n",
+       "      <th>resting ecg_normal</th>\n",
+       "      <th>resting ecg_probable or definite left ventricular hypertrophy</th>\n",
+       "      <th>chest pain type_4</th>\n",
+       "      <th>chest pain type_asymptomatic</th>\n",
+       "      <th>chest pain type_atypical angina</th>\n",
+       "      <th>...</th>\n",
+       "      <th>age_age_[28.00-52.50]</th>\n",
+       "      <th>age_age_[52.50-77.00]</th>\n",
+       "      <th>resting bp s_resting bp s_[0.00-100.00]</th>\n",
+       "      <th>resting bp s_resting bp s_[100.00-200.00]</th>\n",
+       "      <th>cholesterol_cholesterol_[0.00-301.50]</th>\n",
+       "      <th>cholesterol_cholesterol_[301.50-603.00]</th>\n",
+       "      <th>max heart rate_max heart rate_[60.00-131.00]</th>\n",
+       "      <th>max heart rate_max heart rate_[131.00-202.00]</th>\n",
+       "      <th>oldpeak_oldpeak_[-2.60-1.80]</th>\n",
+       "      <th>oldpeak_oldpeak_[1.80-6.20]</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>...</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>...</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>...</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>...</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>...</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>False</td>\n",
+       "      <td>True</td>\n",
+       "      <td>False</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>5 rows × 29 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   ST slope_3  ST slope_downsloping  ST slope_flat  ST slope_upsloping  \\\n",
+       "0       False                 False           True               False   \n",
+       "1       False                  True          False               False   \n",
+       "2       False                 False           True               False   \n",
+       "3       False                  True          False               False   \n",
+       "4       False                 False           True               False   \n",
+       "\n",
+       "   resting ecg_having ST-T wave abnormality  resting ecg_normal  \\\n",
+       "0                                     False                True   \n",
+       "1                                     False                True   \n",
+       "2                                      True               False   \n",
+       "3                                     False                True   \n",
+       "4                                     False                True   \n",
+       "\n",
+       "   resting ecg_probable or definite left ventricular hypertrophy  \\\n",
+       "0                                              False               \n",
+       "1                                              False               \n",
+       "2                                              False               \n",
+       "3                                              False               \n",
+       "4                                              False               \n",
+       "\n",
+       "   chest pain type_4  chest pain type_asymptomatic  \\\n",
+       "0              False                         False   \n",
+       "1              False                          True   \n",
+       "2              False                         False   \n",
+       "3               True                         False   \n",
+       "4              False                          True   \n",
+       "\n",
+       "   chest pain type_atypical angina  ...  age_age_[28.00-52.50]  \\\n",
+       "0                            False  ...                  False   \n",
+       "1                            False  ...                  False   \n",
+       "2                            False  ...                  False   \n",
+       "3                            False  ...                  False   \n",
+       "4                            False  ...                  False   \n",
+       "\n",
+       "   age_age_[52.50-77.00]  resting bp s_resting bp s_[0.00-100.00]  \\\n",
+       "0                  False                                     True   \n",
+       "1                  False                                     True   \n",
+       "2                  False                                     True   \n",
+       "3                  False                                     True   \n",
+       "4                  False                                     True   \n",
+       "\n",
+       "   resting bp s_resting bp s_[100.00-200.00]  \\\n",
+       "0                                      False   \n",
+       "1                                      False   \n",
+       "2                                      False   \n",
+       "3                                      False   \n",
+       "4                                      False   \n",
+       "\n",
+       "   cholesterol_cholesterol_[0.00-301.50]  \\\n",
+       "0                                   True   \n",
+       "1                                   True   \n",
+       "2                                   True   \n",
+       "3                                   True   \n",
+       "4                                   True   \n",
+       "\n",
+       "   cholesterol_cholesterol_[301.50-603.00]  \\\n",
+       "0                                    False   \n",
+       "1                                    False   \n",
+       "2                                    False   \n",
+       "3                                    False   \n",
+       "4                                    False   \n",
+       "\n",
+       "   max heart rate_max heart rate_[60.00-131.00]  \\\n",
+       "0                                         False   \n",
+       "1                                         False   \n",
+       "2                                         False   \n",
+       "3                                         False   \n",
+       "4                                         False   \n",
+       "\n",
+       "   max heart rate_max heart rate_[131.00-202.00]  \\\n",
+       "0                                          False   \n",
+       "1                                          False   \n",
+       "2                                          False   \n",
+       "3                                          False   \n",
+       "4                                          False   \n",
+       "\n",
+       "   oldpeak_oldpeak_[-2.60-1.80]  oldpeak_oldpeak_[1.80-6.20]  \n",
+       "0                          True                        False  \n",
+       "1                          True                        False  \n",
+       "2                          True                        False  \n",
+       "3                          True                        False  \n",
+       "4                          True                        False  \n",
+       "\n",
+       "[5 rows x 29 columns]"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "data_df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "4a80f2df",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:43.405224Z",
+     "iopub.status.busy": "2024-06-26T18:43:43.404868Z",
+     "iopub.status.idle": "2024-06-26T18:43:43.537283Z",
+     "shell.execute_reply": "2024-06-26T18:43:43.536165Z"
+    },
+    "papermill": {
+     "duration": 0.142844,
+     "end_time": "2024-06-26T18:43:43.540092",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:43.397248",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Association Rules:\n",
+      "                                             antecedents  \\\n",
+      "0                                (ST slope_downsloping)   \n",
+      "1                                   (chest pain type_4)   \n",
+      "2                                (ST slope_downsloping)   \n",
+      "3                                            (sex_male)   \n",
+      "4                                (ST slope_downsloping)   \n",
+      "...                                                 ...   \n",
+      "3533  (target_Normal, cholesterol_cholesterol_[0.00-...   \n",
+      "3534  (resting bp s_resting bp s_[0.00-100.00], exer...   \n",
+      "3535  (cholesterol_cholesterol_[0.00-301.50], exerci...   \n",
+      "3536                                    (target_Normal)   \n",
+      "3537                               (exercise angina_no)   \n",
+      "\n",
+      "                                            consequents  antecedent support  \\\n",
+      "0                                   (chest pain type_4)            0.489076   \n",
+      "1                                (ST slope_downsloping)            0.525210   \n",
+      "2                                            (sex_male)            0.489076   \n",
+      "3                                (ST slope_downsloping)            0.763866   \n",
+      "4                           (fasting blood sugar_false)            0.489076   \n",
+      "...                                                 ...                 ...   \n",
+      "3533  (fasting blood sugar_false, exercise angina_no...            0.471429   \n",
+      "3534  (target_Normal, fasting blood sugar_false, cho...            0.612605   \n",
+      "3535  (target_Normal, fasting blood sugar_false, res...            0.612605   \n",
+      "3536  (fasting blood sugar_false, oldpeak_oldpeak_[-...            0.471429   \n",
+      "3537  (fasting blood sugar_false, oldpeak_oldpeak_[-...            0.612605   \n",
+      "\n",
+      "      consequent support   support  confidence      lift  leverage  \\\n",
+      "0               0.525210  0.328571    0.671821  1.279148  0.071704   \n",
+      "1               0.489076  0.328571    0.625600  1.279148  0.071704   \n",
+      "2               0.763866  0.394958    0.807560  1.057202  0.021370   \n",
+      "3               0.489076  0.394958    0.517052  1.057202  0.021370   \n",
+      "4               0.786555  0.370588    0.757732  0.963356 -0.014096   \n",
+      "...                  ...       ...         ...       ...       ...   \n",
+      "3533            0.492437  0.357143    0.757576  1.538422  0.124994   \n",
+      "3534            0.415126  0.357143    0.582990  1.404370  0.102835   \n",
+      "3535            0.415126  0.357143    0.582990  1.404370  0.102835   \n",
+      "3536            0.492437  0.357143    0.757576  1.538422  0.124994   \n",
+      "3537            0.415126  0.357143    0.582990  1.404370  0.102835   \n",
+      "\n",
+      "      conviction  zhangs_metric  \n",
+      "0       1.446742       0.427127  \n",
+      "1       1.364648       0.459634  \n",
+      "2       1.227056       0.105900  \n",
+      "3       1.057928       0.229136  \n",
+      "4       0.881030      -0.069291  \n",
+      "...          ...            ...  \n",
+      "3533    2.093697       0.662130  \n",
+      "3534    1.402543       0.743264  \n",
+      "3535    1.402543       0.743264  \n",
+      "3536    2.093697       0.662130  \n",
+      "3537    1.402543       0.743264  \n",
+      "\n",
+      "[3538 rows x 10 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "from mlxtend.frequent_patterns import apriori, association_rules\n",
+    "\n",
+    "# Use the Apriori algorithm\n",
+    "frequent_itemsets = apriori(data_df, min_support=0.3, use_colnames=True)\n",
+    "rules = association_rules(frequent_itemsets, metric='confidence', min_threshold=0.5)\n",
+    "\n",
+    "# Print the association rules\n",
+    "print(\"Association Rules:\\n\", rules)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "bd5ce13e",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2024-06-26T18:43:43.555252Z",
+     "iopub.status.busy": "2024-06-26T18:43:43.554383Z",
+     "iopub.status.idle": "2024-06-26T18:43:43.575319Z",
+     "shell.execute_reply": "2024-06-26T18:43:43.573734Z"
+    },
+    "papermill": {
+     "duration": 0.03089,
+     "end_time": "2024-06-26T18:43:43.577580",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:43.546690",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Filtered Association Rules with target_heart disease:\n",
+      "                                             antecedents  \\\n",
+      "5                                (ST slope_downsloping)   \n",
+      "38                                  (chest pain type_4)   \n",
+      "51                                           (sex_male)   \n",
+      "78                                (exercise angina_yes)   \n",
+      "85            (resting bp s_resting bp s_[0.00-100.00])   \n",
+      "...                                                 ...   \n",
+      "3465  (cholesterol_cholesterol_[0.00-301.50], fastin...   \n",
+      "3472  (fasting blood sugar_false, sex_male, oldpeak_...   \n",
+      "3474  (fasting blood sugar_false, resting bp s_resti...   \n",
+      "3477  (fasting blood sugar_false, cholesterol_choles...   \n",
+      "3485              (fasting blood sugar_false, sex_male)   \n",
+      "\n",
+      "                                            consequents  antecedent support  \\\n",
+      "5                                (target_heart disease)            0.489076   \n",
+      "38                               (target_heart disease)            0.525210   \n",
+      "51                               (target_heart disease)            0.763866   \n",
+      "78                               (target_heart disease)            0.387395   \n",
+      "85                               (target_heart disease)            1.000000   \n",
+      "...                                                 ...                 ...   \n",
+      "3465  (oldpeak_oldpeak_[-2.60-1.80], target_heart di...            0.581513   \n",
+      "3472  (cholesterol_cholesterol_[0.00-301.50], restin...            0.581513   \n",
+      "3474  (cholesterol_cholesterol_[0.00-301.50], oldpea...            0.581513   \n",
+      "3477  (target_heart disease, oldpeak_oldpeak_[-2.60-...            0.581513   \n",
+      "3485  (cholesterol_cholesterol_[0.00-301.50], target...            0.581513   \n",
+      "\n",
+      "      consequent support   support  confidence      lift  leverage  \\\n",
+      "5               0.528571  0.385714    0.788660  1.492059  0.127203   \n",
+      "38              0.528571  0.405882    0.772800  1.462054  0.128271   \n",
+      "51              0.528571  0.469748    0.614961  1.163441  0.065990   \n",
+      "78              0.528571  0.321849    0.830803  1.571789  0.117083   \n",
+      "85              0.528571  0.528571    0.528571  1.000000  0.000000   \n",
+      "...                  ...       ...         ...       ...       ...   \n",
+      "3465            0.528571  0.330252    0.567919  1.074441  0.022881   \n",
+      "3472            0.528571  0.330252    0.567919  1.074441  0.022881   \n",
+      "3474            0.528571  0.330252    0.567919  1.074441  0.022881   \n",
+      "3477            0.528571  0.330252    0.567919  1.074441  0.022881   \n",
+      "3485            0.528571  0.330252    0.567919  1.074441  0.022881   \n",
+      "\n",
+      "      conviction  zhangs_metric  \n",
+      "5       2.230662       0.645468  \n",
+      "38      2.074950       0.665622  \n",
+      "51      1.224367       0.594917  \n",
+      "78      2.786264       0.593828  \n",
+      "85      1.000000       0.000000  \n",
+      "...          ...            ...  \n",
+      "3465    1.091065       0.165558  \n",
+      "3472    1.091065       0.165558  \n",
+      "3474    1.091065       0.165558  \n",
+      "3477    1.091065       0.165558  \n",
+      "3485    1.091065       0.165558  \n",
+      "\n",
+      "[262 rows x 10 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Filter rules where consequents contain 'target_heart disease'\n",
+    "filtered_rules = rules[rules['consequents'].apply(lambda x: 'target_heart disease' in str(x))]\n",
+    "\n",
+    "# Print the filtered rules\n",
+    "print(\"Filtered Association Rules with target_heart disease:\\n\", filtered_rules)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7bbadfdb",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006246,
+     "end_time": "2024-06-26T18:43:43.590456",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:43.584210",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "**Heart Disease Bussiness Problem Description**\n",
+    "\n",
+    "Heart disease is one of the leading causes of death globally, and early detection and prevention are critical to reducing mortality rates and improving patient outcomes.\n",
+    "\n",
+    "Hospitals are constantly seeking advanced methods to identify high-risk individuals and understand the underlying factors contributing to heart disease.\n",
+    "\n",
+    "This model aims to address the bussiness problem of enhancing the indentification and understanding of heart disease risk factors through data-driven insights.\n",
+    "\n",
+    "**Objective**\n",
+    "\n",
+    "The primary objective is to leverage historical patient data to discover patterns and associations that can help in early detection, prevention, and management of heart disease. By identifying significant risk factors and thier interrelationships, healthcare providers can make more informed decisions, tailor preventive measures, and improve patient care\n",
+    "\n",
+    "**Challenges**\n",
+    "\n",
+    "1. **Complexity of Data:** Patient data is often complex and multidimensional, making it challenging to identify relevant patterns manually.\n",
+    "2. **Early Detection:** Early detection of heart disease risk factors is crucial for prevention, but traditional methods may not always capture the intricate relationships between different health indicators.\n",
+    "3. **Resource Allocation:** Efficiently allocating medical resources and interventions to high-risk individuals requires accurate identification of those individuals based on their risk profiles.\n",
+    "4. **Personalized Care:** Providing personalized care plans based on individual risk factors necessitates a deep understanding of how these factors interact.\n",
+    "\n",
+    "**Model Role in Addressing the Problem:**\n",
+    "\n",
+    "**Association Rule Mining:**\n",
+    "The model uses Apriori algorithm to identify frequent itemsets and generate association rules from patient data. These rules highlight the co-occurence of various health indicators and their relationship with heart disease.\n",
+    "\n",
+    "**Benefits**\n",
+    "1. **Data-Driven Insights:** The model provides healthcare providers with data-driven insights into the risk factors associated with heart disease. For instance, it can reveal how cetain conditions like high cholesterol, specific age ranges, or types of chest pain are linked to heart disease.\n",
+    "2. **Early Detection:** By understanding the combinations of factors that frequently precede heart disease diagnoses, the model aids in early detection. This allows for timely interventions that can prevent the progression of the disease.\n",
+    "3. **Resource Optimization:** The insights from the model help in identifying high-risk patients, enabling healthcare providers to prioritize resources and interventions for those who need them most.\n",
+    "4. **Personalized Treatment Plans:** The detailed rules generated by the model support the creation of personalized treatment and prevention plans. For example, a patient with a combination of factors identified as high risk can receive targeted lifestyle advice, monitoring, and medical treatment.\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "75e7e126",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006213,
+     "end_time": "2024-06-26T18:43:43.603201",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:43.596988",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "**Interpretation of Results**\n",
+    "\n",
+    "1.**Rule 5:** \n",
+    "- **Antecedents**:(ST slope_downsloping), **Consequents**:(target_heart disease)\n",
+    "- **Support**: 0.3857 (38.57% of transactions contain both antecedents and consequences\n",
+    "- **Confidence**: 0.7887 (78.87% of transations that contain the antecedents also contain the consequents\n",
+    "- **Lift**: 1.49 (The occurance of the consequences is more likely when the antecedents is present than by chance)\n",
+    "- **Leverage**: 0.1272 (indicates positive association)\n",
+    "- **Conviction**: 2.23 (Strong dependence of the consequent on the antecedent)\n",
+    "- **Zhang's Metric**: 0.645 (indicates strong positive association)\n",
+    "- **Interpretation**: If a transaction contains (ST slope_downsloping), there is a 78.87% chance it will also contain (target_heart disease). The lift is significantly greater than 1, indicating a strong positive correlation. The leverage and Zhang's Metric values also indicate a strong positive assocation.\n",
+    "\n",
+    "2.**Rule 38:**\n",
+    "- **Antecedents**:(chest pain type_4), **Consequents**:(target_heart disease)\n",
+    "- **Support**: 0.4059 (40.59% of transactions contain both antecedents and consequents)\n",
+    "- **Confidence**: 0.7728 (77.28% of transactions that contain (chest pain type_4) also contain (target_heart disease)\n",
+    "- **Lift**: 1.46 (The occurence of the consequents is more likely when the antecedents is present than by chance\n",
+    "- **Leverage**: 0.1283 (A positive value indicating a positive association)\n",
+    "- **Conviction**: 2.075 (There is a strong dependence of the consequent on the antecedent)\n",
+    "- **Zhang's Metric**: 0.6656 (indicates a strong positive association)\n",
+    "- **Interpretation**: If a transaction contains (chest pain type_4), there is a 77.28% chance it will also contain (target_heart disease). The lift is significantly greater than 1, indicating a strong positive correlation. The leverage and Zheng's Metric values also indicate a strong positive correlation\n",
+    "\n",
+    "3.**Rule 51:**\n",
+    "- **Antecedents**:(sex_male), **Consequents**:(target_heart disease)\n",
+    "- **Support**: 0.469748 (46.97% of transactions contain both antecedents and consequents)\n",
+    "- **Confidence**: 0.614961 (61.50% of transactions that contain (sex_male) also contain (target_heart disease))\n",
+    "- **Lift**: 1.163441 (The occurrence of (target_heart disease) is more likely when (sex_male) is present than by chance)\n",
+    "- **Leverage**: 0.065990 (A positive value indicating a positive association)\n",
+    "- **Conviction**: 1.224367 (There is a moderate dependence of the consequent on the antecedent)\n",
+    "- **Zhang's Metric**: Zhang's Metric: 0.594917 (Indicates a moderate positive association)\n",
+    "- **Interpretation**: If a transaction contains (sex_male), there is a 61.50% chance it will also contain (target_heart disease). The lift is greater than 1, indicating a positive correlation. The leverage and Zhang's Metric values also indicate a moderate positive association.\n",
+    "\n",
+    "4.**Rule 78:**\n",
+    "- **Antecedents**:(exercise angina_yes), **Consequents**:(target_heart disease)\n",
+    "- **Support**: 0.321849 (32.18% of transactions contain both antecedents and consequents)\n",
+    "- **Confidence**: 0.830803 (83.08% of transactions that contain (exercise angina_yes) also contain (target_heart disease))\n",
+    "- **Lift**: (The occurrence of (target_heart disease) is more likely when (exercise angina_yes) is present than by chance)\n",
+    "- **Leverage**: 0.117083 (A positive value indicating a positive association)\n",
+    "- **Conviction**: 2.786264 (There is a strong dependence of the consequent on the antecedent)\n",
+    "- **Zhang's Metric**: 0.593828 (Indicates a strong positive association)\n",
+    "- **Interpretation**:  If a transaction contains (exercise angina_yes), there is an 83.08% chance it will also contain (target_heart disease). The lift is significantly greater than 1, indicating a strong positive correlation. The leverage and Zhang's Metric values also indicate a strong positive association.\n",
+    "\n",
+    "5.**Rule 86:**\n",
+    "- **Antecedents**:(esting bp s_resting bp s_[0.00-100.00]), **Consequents**:(target_heart disease))\n",
+    "- **Support**: 0.528571 (52.86% of transactions contain both antecedents and consequents)\n",
+    "- **Confidence**: 0.528571 (52.86% of transactions that contain (resting bp s_resting bp s_[0.00-100.00]) also contain (target_heart disease))\n",
+    "- **Lift**: 1.000000 (The occurrence of (target_heart disease) is neither more nor less likely when (resting bp s_resting bp s_[0.00-100.00]) is present than by chance)\n",
+    "- **Leverage**: 0.000000 (No additional information provided by the association)\n",
+    "- **Conviction**: 1.000000 (No dependency between antecedent and consequent)\n",
+    "- **Zhang's Metric**: 0.000000 (No association)\n",
+    "- **Interpretation**: If a transaction contains (resting bp s_resting bp s_[0.00-100.00]), there is a 52.86% chance it will also contain (target_heart disease). The lift is 1, indicating no correlation. The leverage, conviction, and Zhang's Metric values indicate no association."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "84062005",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006203,
+     "end_time": "2024-06-26T18:43:43.616500",
+     "exception": false,
+     "start_time": "2024-06-26T18:43:43.610297",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "**Key Risk Factors of Heart Disease According to the Model**\n",
+    "\n",
+    "1. **ST slope_downsloping** - Indicates myocardial ischemia\n",
+    "2. **Chest Pain type_4** - Asymptomatic Chest pain\n",
+    "3. **Male Gender** - Men tend to have heart diease more often than women\n",
+    "4. **Exercise-Induced Angina** - Chest pain that occurs during exercise\n",
+    "\n",
+    "**Discussion**\n",
+    "\n",
+    "With the exception of the identification of asymptomatic chest pain, the identified risk factors are already known to be indicators of heart disease. This suggests that the model is capable of identifying risk factors that contribute to heart disease diagnoses.\n",
+    "\n",
+    "Further testing should be done with a much larger dataset, as well as with data that contains more health feature data to identify unique patterns between health factors that may not already be associated with heart disease."
+   ]
+  }
+ ],
+ "metadata": {
+  "kaggle": {
+   "accelerator": "none",
+   "dataSources": [
+    {
+     "datasetId": 4755824,
+     "sourceId": 8062170,
+     "sourceType": "datasetVersion"
+    }
+   ],
+   "dockerImageVersionId": 30732,
+   "isGpuEnabled": false,
+   "isInternetEnabled": true,
+   "language": "python",
+   "sourceType": "notebook"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.13"
+  },
+  "papermill": {
+   "default_parameters": {},
+   "duration": 5.623226,
+   "end_time": "2024-06-26T18:43:44.142700",
+   "environment_variables": {},
+   "exception": null,
+   "input_path": "__notebook__.ipynb",
+   "output_path": "__notebook__.ipynb",
+   "parameters": {},
+   "start_time": "2024-06-26T18:43:38.519474",
+   "version": "2.5.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
